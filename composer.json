@@ -1,0 +1,23 @@
+{
+  "name": "php/master-sql",
+  "description": "Simple api designed for learning sql",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "GiorgiKumelashvili",
+      "email": "giorgi.kumelashvili21@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "app\\": "./"
+    }
+  },
+  "require": {
+    "php": "^7.4",
+    "ext-pdo": "*",
+    "vlucas/phpdotenv": "^5.3",
+    "ext-json": "*"
+  }
+}

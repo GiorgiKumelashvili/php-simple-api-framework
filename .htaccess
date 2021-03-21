@@ -1,0 +1,28 @@
+# restrict access to all folders
+Options -Indexes
+
+# allow any type of url on index.php folder
+<IfModule mod_rewrite.c>
+    DirectoryIndex index.php
+    RewriteEngine On
+    RewriteCond  %{REQUEST_FILENAME} !-d
+    RewriteCond  %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php/$1 [L]
+</IfModule>
+
+# restrict access to all php file
+<Files *.php>
+    Order Deny,Allow
+    Deny from all
+    Allow from 127.0.0.1
+</Files>
+
+#only allow index.php
+<Files index.php>
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+#    change name into url
+#    ErrorDocument 404 /master-sql-backend/index.php
+#    ErrorDocument 403 /master-sql-backend/index.php
