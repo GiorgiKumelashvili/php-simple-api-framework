@@ -17,8 +17,14 @@ Options -Indexes
     Allow from 127.0.0.1
 </Files>
 
-#only allow index.php
+# 1) Allow index.php
 <Files index.php>
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+# 2) Allow client
+<Files client>
     Order Allow,Deny
     Allow from all
 </Files>

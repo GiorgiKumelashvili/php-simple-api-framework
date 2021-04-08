@@ -9,6 +9,11 @@
       "email": "giorgi.kumelashvili21@gmail.com"
     }
   ],
+  "config": {
+    "platform": {
+      "php": "7.4.3"
+    }
+  },
   "autoload": {
     "psr-4": {
       "app\\": "./"

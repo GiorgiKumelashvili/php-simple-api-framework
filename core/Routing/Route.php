@@ -1,7 +1,9 @@
 <?php
+/** @noinspection PhpIncludeInspection */
 
 namespace app\core\Routing;
 
+use app\core\Helpers\FileManager;
 use app\core\Helpers\Helper;
 use app\core\Http\Http;
 use app\core\Http\Response;
@@ -17,6 +19,19 @@ final class Route {
 
     public static function post(string $path, array $params): void {
         self::execute($path, $params, self::POST_TYPE);
+    }
+
+    public static function view(string $path, string $viewName): void {
+        self::$routes[self::GET_TYPE][$path] = $viewName;
+
+        if (self::validateUrl($path)) {
+            echo "<!doctype html><html lang=\"en\">";
+            require_once FileManager::fullpath("client/layouts/head.php");
+            echo "<body>";
+            require_once FileManager::fullpath("client/views/{$viewName}.php");
+            require_once FileManager::fullpath("client/layouts/bottom.php");
+            echo "</body></html>";
+        }
     }
 
     private static function execute(string $path, array $params, string $requestMethod): void {
@@ -48,7 +63,7 @@ final class Route {
     }
 
     private static function validateUrl($requestedPath): bool {
-        return Helper::rootPath() === $requestedPath;
+        return Helper::path() === $requestedPath;
     }
 
     private static function execArray(string $className, string $methodName): void {
@@ -68,7 +83,7 @@ final class Route {
      * Must be last method to run (after registering routes)
      */
     public static function validateUnkownUrl() {
-        $currentUrl = Helper::rootPath();
+        $currentUrl = Helper::path();
         $methodType = Http::$app->request()->method();
 
         if (!array_key_exists($currentUrl, self::routes($methodType))) {
