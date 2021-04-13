@@ -2,12 +2,22 @@
 
 namespace app\core\Http;
 
-class Request {
-    public function test() {
-        echo 'helo from rquest';
+final class Request {
+    private static ?Request $instance = null;
+
+    public static function Instance(): ?Request {
+        if (self::$instance == null) {
+            self::$instance = new Request();
+        }
+
+        return self::$instance;
     }
 
-    public function getBodyData(): array {
+    /**
+     * Returns requested data
+     * no matter which http method it wass
+     */
+    public function data(): array {
         $req = stream_get_contents(fopen('php://input', 'r'));
         return json_decode($req, true) ?? [];
     }

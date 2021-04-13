@@ -7,13 +7,9 @@ use app\core\Helpers\Helper;
 use PDO;
 use PDOException;
 
-/**
- * Class Core
- * @package app\core\Database
- */
 class Core {
-    private static ?object $instance = null;
-    private static PDO $connection;
+    private static ?PDO $connection = null;
+    private static ?Core $instance = null;
 
     private function __construct() {
         try {
@@ -26,25 +22,34 @@ class Core {
             $DSN = "mysql:host={$dbhost};port={$dbport};dbname={$dbname}";
 
             // Connect
-            $db = new PDO($DSN, $dbusername, $dbpassword, [
+            self::$connection = new PDO($DSN, $dbusername, $dbpassword, [
                 PDO::ATTR_ERRMODE => true,
                 PDO::ERRMODE_EXCEPTION => true
             ]);
-
-            self::$connection = $db;
         }
         catch (PDOException $e) {
             die("Connection failed: {$e->getMessage()}");
         }
     }
 
-    protected static function Initialize(): void {
-        if (self::$instance == null) {
+    /**
+     * Main function for initializing object and $connection
+     * which is most important one, if Database name is not
+     * provided then Initialization wont happen
+     */
+    public static function Initialize(): void {
+        if (self::$instance === null) {
             self::$instance = new Core();
         }
     }
 
-    public static function connection(): PDO {
+    /**
+     * Returns database connection which will always
+     * be inititalized ony once
+     *
+     * @return PDO
+     */
+    protected static function connection(): PDO {
         return self::$connection;
     }
 }

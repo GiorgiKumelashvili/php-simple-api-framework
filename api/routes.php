@@ -6,17 +6,18 @@
  * |============================================
  */
 
+use app\api\controllers\TestController;
 use app\core\Routing\Route;
 
 
-Route::get('/', [\app\api\controllers\TestController::class, 'log']);
-Route::view('/test', 'test');
-Route::view('/test/test2', 'test2');
-Route::view('/test/inside', 'testdir/inside');
+Route::get('/', [TestController::class, 'log']);
+Route::view('/test', 'testView');
+Route::viewComponent('/test/comp', 'testComponent');
 
 
 ////-------------------[ TEST AREA ]------------------------\\
 //echo "<br><br><hr>TEST AREA<hr><br><br>";
+//die();
 ////---------------------------------------------------------\\
 
 
