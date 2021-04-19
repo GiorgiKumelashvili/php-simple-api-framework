@@ -11,6 +11,8 @@ use app\core\Routing\Route;
 
 
 Route::get('/', [TestController::class, 'log']);
+
+// Testing views
 Route::view('/test', 'testView');
 Route::viewComponent('/test/comp', 'testComponent');
 
