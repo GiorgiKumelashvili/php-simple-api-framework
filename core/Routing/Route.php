@@ -8,6 +8,8 @@ use app\core\Helpers\Helper;
 use app\core\Helpers\View;
 use app\core\Http\Request;
 use app\core\Http\Response;
+use ReflectionClass;
+use ReflectionException;
 
 final class Route {
     private static array $routes = [];
@@ -106,7 +108,41 @@ final class Route {
             Response::Instance()->exception($message, Response::ERROR_CODE);
         }
 
-        call_user_func([new $className(), $methodName]);
+        self::callMethod($className, $methodName);
+    }
+
+    /**
+     * For now it can only inject Request and Response objects, nothing else
+     * Method is called with Reflection magic
+     *
+     * @param string $className
+     * @param string $methodName
+     */
+    private static function callMethod(string $className, string $methodName) {
+        $primitives = ['array', 'bool', 'string', 'int', 'float']; // todo check for primitive types
+        $objects = []; // Later will be injected in invoked method
+
+        try {
+            $reflectionClass = new ReflectionClass($className);
+            $method = $reflectionClass->getMethod($methodName);
+
+            // check if parameters are present
+            if ($method->getNumberOfParameters()) {
+                // this works for only singleton and static method Instance
+                foreach ($method->getParameters() as $parameter) {
+                    $instance = call_user_func([(string)$parameter->getType(), 'Instance']);
+                    $objects[] = $instance;
+                }
+
+                call_user_func_array([new $className(), $methodName], $objects);
+            }
+        }
+        catch (ReflectionException $e) {
+            Response::Instance()->json([
+                "message" => "Somethig went wrong (ReflectionException)",
+                "error" => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

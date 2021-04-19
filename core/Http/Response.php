@@ -8,7 +8,6 @@ final class Response {
     private static ?Response $instance = null;
     public const ERROR_CODE = 404;
 
-
     public static function Instance(): ?Response {
         if (self::$instance == null) {
             self::$instance = new Response();
