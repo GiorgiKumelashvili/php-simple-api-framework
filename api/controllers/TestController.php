@@ -8,10 +8,12 @@ use app\core\Http\Response;
 
 class TestController {
     public function log(Request $request, Response $response) {
-        $method = $request->method();
+        $data = $request->validate([
+            'message' => 'required'
+        ]);
 
         $response->json([
-            'msg' => $method
+            'data' => $data
         ]);
     }
 }

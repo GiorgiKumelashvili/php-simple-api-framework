@@ -2,7 +2,7 @@
 
 namespace app\core\Http;
 
-final class Request {
+final class Request extends ValidateRequest {
     private static ?Request $instance = null;
 
     public static function Instance(): ?Request {
@@ -14,29 +14,15 @@ final class Request {
     }
 
     /**
-     * Returns and sanitzes requested body data
+     * Returns requested body data
      * no matter which http method it was
      *
      */
     public function body(): array {
-        $body = [];
-
-        if ($this->isGet()) {
-            foreach ($_GET as $key => $value) {
-                $body[$key] = filter_input(INPUT_GET, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-            }
-        }
-
-        if ($this->isPost()) {
-            $data = stream_get_contents(fopen('php://input', 'r'));
-            $data_assoc = json_decode($data, true) ?? [];
-
-            foreach ($data_assoc as $key => $value) {
-                $body[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-            }
-        }
-
-        return $body;
+        $file = fopen('php://input', 'r');
+        $data = json_decode(stream_get_contents($file), true) ?? [];
+        fclose($file);
+        return $data;
     }
 
     public function method(): string {
@@ -50,4 +36,18 @@ final class Request {
     public function isPost(): bool {
         return $this->method() === 'POST';
     }
+
+    private function get_status_message(int $statusCode): string {
+        $status = [
+            '200' => 'OK',
+            '201' => 'Created',
+            '204' => 'No Content',
+            '404' => 'Not Found',
+            '406' => 'Not Acceptable',
+            '500' => 'Server error'
+        ];
+
+        return $status[$statusCode] ?? $status['500'];
+    }
+
 }
