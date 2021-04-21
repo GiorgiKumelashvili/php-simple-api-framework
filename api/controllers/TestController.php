@@ -3,17 +3,20 @@
 
 namespace app\api\controllers;
 
-use app\core\Http\Request;
-use app\core\Http\Response;
+use app\core\Database\Migration;
 
 class TestController {
-    public function log(Request $request, Response $response) {
-        $data = $request->validate([
-            'message' => 'required'
-        ]);
+    public function up() {
+        echo "<pre>";
 
-        $response->json([
-            'data' => $data
-        ]);
+        $mig = new Migration();
+        $mig->migrate();
+    }
+
+    public function down() {
+        echo "<pre>";
+
+        $mig = new Migration();
+        $mig->drop();
     }
 }

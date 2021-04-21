@@ -4,11 +4,12 @@
 namespace app\core\Database;
 
 use app\core\Helpers\Helper;
+use app\core\Http\Response;
 use PDO;
 use PDOException;
 
 class Core {
-    private static ?PDO $connection = null;
+    protected static ?PDO $connection = null;
     private static ?Core $instance = null;
 
     private function __construct() {
@@ -22,13 +23,11 @@ class Core {
             $DSN = "mysql:host={$dbhost};port={$dbport};dbname={$dbname}";
 
             // Connect
-            self::$connection = new PDO($DSN, $dbusername, $dbpassword, [
-                PDO::ATTR_ERRMODE => true,
-                PDO::ERRMODE_EXCEPTION => true
-            ]);
+            self::$connection = new PDO($DSN, $dbusername, $dbpassword);
+            self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         catch (PDOException $e) {
-            die("Connection failed: {$e->getMessage()}");
+            Response::Instance()->errorMessage($e->getMessage());
         }
     }
 

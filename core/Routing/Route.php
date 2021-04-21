@@ -126,6 +126,7 @@ final class Route {
             $reflectionClass = new ReflectionClass($className);
             $method = $reflectionClass->getMethod($methodName);
 
+
             // check if parameters are present
             if ($method->getNumberOfParameters()) {
                 // this works for only singleton and static method Instance
@@ -135,6 +136,9 @@ final class Route {
                 }
 
                 call_user_func_array([new $className(), $methodName], $objects);
+            }
+            else {
+                call_user_func([new $className(), $methodName]);
             }
         }
         catch (ReflectionException $e) {
