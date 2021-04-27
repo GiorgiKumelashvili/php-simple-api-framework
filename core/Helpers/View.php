@@ -2,6 +2,12 @@
 
 namespace app\core\Helpers;
 
+/**
+ * Class View
+ * @package app\core\Helpers
+ *
+ * This class provides some html boilerplate
+ */
 class View {
     public static function head_HTML(string $title = 'Document'): string {
         return sprintf('
@@ -18,7 +24,7 @@ class View {
         ', $title);
     }
 
-    public static function body_HTML(): string {
+    public static function bottom_HTML(): string {
         return '</body></html>';
     }
 

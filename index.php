@@ -5,9 +5,11 @@
  * @version 1.0.4
  */
 
+use app\core\Main;
+
 require_once __DIR__ . "/vendor/autoload.php";
 
-$main = new \app\core\Main();
+$main = new Main();
 $main->start();
 
 

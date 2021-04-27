@@ -6,7 +6,6 @@ namespace app\core\Routing;
 use app\core\Helpers\FileManager;
 use app\core\Helpers\Helper;
 use app\core\Helpers\View;
-use app\core\Http\Request;
 use app\core\Http\Response;
 use ReflectionClass;
 use ReflectionException;
@@ -38,21 +37,21 @@ final class Route {
         self::$routes[self::GET_TYPE][$path] = $viewName;
 
         if (self::validateUrl($path)) {
-            require_once FileManager::fullpath("api/view/{$viewName}.php");
+            require_once FileManager::fullpath("api/view/$viewName.php");
         }
     }
 
     /**
      * View Component route method, used for viwing php file with
-     * asssistance of html
+     * asssistance of html boilerplate
      */
-    public static function viewComponent(string $path, string $viewName): void {
+    public static function smartView(string $path, string $viewName): void {
         self::$routes[self::GET_TYPE][$path] = $viewName;
 
         if (self::validateUrl($path)) {
             echo View::head_HTML(Helper::env('APP_NAME'));
-            require_once FileManager::fullpath("api/view/{$viewName}.php");
-            echo View::body_HTML();
+            require_once FileManager::fullpath("api/view/$viewName.php");
+            echo View::bottom_HTML();
         }
     }
 
@@ -62,16 +61,15 @@ final class Route {
      */
     private static function execute(string $path, array $params, string $requestMethod): void {
         self::validateParameters($params);
+
+        // register routes
         self::$routes[$requestMethod][$path] = $params;
+
+        // destructure
         list($className, $methodName) = $params;
-        $boolean = false;
 
-        if ($requestMethod === self::GET_TYPE)
-            $boolean = Request::Instance()->isGet();
-        elseif ($requestMethod === self::POST_TYPE)
-            $boolean = Request::Instance()->isGet();
-
-        if (self::validateUrl($path) && $boolean)
+        // execute method
+        if (self::validateUrl($path))
             self::execArray($className, $methodName);
     }
 
@@ -80,16 +78,17 @@ final class Route {
      * 2 argument and both must be string
      */
     private static function validateParameters(array $params) {
-        $message = null;
-
         if (count($params) !== 2)
-            $message = "[GIO] Parameters must contain exactly 2 argument";
+            Response::Instance()->exception(
+                "[SERVER] Parameters must contain exactly 2 argument",
+                Response::_SERVER_ERROR
+            );
 
         if (gettype($params[0]) !== 'string' || gettype($params[1]) !== 'string')
-            $message = "[GIO] Arguments must be both string type";
-
-        if ($message)
-            Response::Instance()->exception($message, Response::ERROR_CODE);
+            Response::Instance()->exception(
+                "[SERVER] Arguments must be both string type",
+                Response::_SERVER_ERROR
+            );
     }
 
     /**
@@ -104,8 +103,10 @@ final class Route {
      */
     private static function execArray(string $className, string $methodName): void {
         if (!method_exists($className, $methodName)) {
-            $message = "[GIO] \"{$methodName}()\" method doesn't exists on class \"{$className}\"<br>";
-            Response::Instance()->exception($message, Response::ERROR_CODE);
+            Response::Instance()->exception(
+                "[SERVER] \"$methodName()\" method doesn't exists on class \"$className\"<br>",
+                Response::_SERVER_ERROR
+            );
         }
 
         self::callMethod($className, $methodName);
@@ -118,26 +119,27 @@ final class Route {
      * @param string $className
      * @param string $methodName
      */
-    private static function callMethod(string $className, string $methodName) {
-        $primitives = ['array', 'bool', 'string', 'int', 'float']; // todo check for primitive types
-        $objects = []; // Later will be injected in invoked method
-
+    private static function callMethod(string $className, string $methodName): void {
         try {
             $reflectionClass = new ReflectionClass($className);
             $method = $reflectionClass->getMethod($methodName);
 
-
             // check if parameters are present
             if ($method->getNumberOfParameters()) {
-                // this works for only singleton and static method Instance
+                // Object array which will be injected into method as parameters
+                $objects = array();
+
+                // Create and register objects using reflection class
                 foreach ($method->getParameters() as $parameter) {
-                    $instance = call_user_func([(string)$parameter->getType(), 'Instance']);
-                    $objects[] = $instance;
+                    $finalClassName = (string)$parameter->getType();
+                    $objects[] = new $finalClassName;
                 }
 
+                // Call method by injecting objects inside as parameters
                 call_user_func_array([new $className(), $methodName], $objects);
             }
             else {
+                // Just Call method
                 call_user_func([new $className(), $methodName]);
             }
         }
@@ -162,10 +164,13 @@ final class Route {
      */
     public static function validateUnkownUrl() {
         $currentUrl = Helper::path();
-        $methodType = Request::Instance()->method();
+        $methodType = $_SERVER['REQUEST_METHOD'];
 
         if (!array_key_exists($currentUrl, self::routes($methodType))) {
-            Response::Instance()->exception("[GIO] {$methodType} page on \"{$currentUrl}\" Not found", 500);
+            Response::Instance()->exception(
+                "[SERVER] $methodType page on \"$currentUrl\" Not found",
+                Response::_NOT_FOUND
+            );
         }
     }
 }

@@ -126,7 +126,7 @@ class Migration extends Core {
     }
 
     private function callUpMethod(string $migrationNamespace, string $applyMigration, int $type = 1) {
-        $newMigratioClassName = $migrationNamespace . pathinfo($applyMigration, PATHINFO_FILENAME);;
+        $newMigratioClassName = $migrationNamespace . pathinfo($applyMigration, PATHINFO_FILENAME);
         $newMigration = new $newMigratioClassName;
 
         if ($type === 1) {

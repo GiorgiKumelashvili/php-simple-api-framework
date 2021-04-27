@@ -3,14 +3,10 @@
 namespace app\core\Http;
 
 final class Request extends ValidateRequest {
-    private static ?Request $instance = null;
+    public function __construct() { }
 
-    public static function Instance(): ?Request {
-        if (self::$instance == null) {
-            self::$instance = new Request();
-        }
-
-        return self::$instance;
+    public static function Instance(): Request {
+        return new Request();
     }
 
     /**
@@ -25,16 +21,12 @@ final class Request extends ValidateRequest {
         return $data;
     }
 
-    public function method(): string {
-        return $_SERVER['REQUEST_METHOD'];
-    }
-
     public function isGet(): bool {
-        return $this->method() === 'GET';
+        return $_SERVER['REQUEST_METHOD'] === 'GET';
     }
 
     public function isPost(): bool {
-        return $this->method() === 'POST';
+        return $_SERVER['REQUEST_METHOD'] === 'POST';
     }
 
     private function get_status_message(int $statusCode): string {

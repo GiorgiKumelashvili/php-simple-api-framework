@@ -5,15 +5,13 @@ namespace app\core\Http;
 
 
 final class Response {
-    private static ?Response $instance = null;
-    public const ERROR_CODE = 404;
+    public const _NOT_FOUND = 404;
+    public const _SERVER_ERROR = 500;
 
-    public static function Instance(): ?Response {
-        if (self::$instance == null) {
-            self::$instance = new Response();
-        }
+    public function __construct() { }
 
-        return self::$instance;
+    public static function Instance(): Response {
+        return new Response();
     }
 
     public function json($data) {
